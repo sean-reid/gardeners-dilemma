@@ -36,5 +36,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm turbo build
+        env:
+          VITE_PARTY_HOST: ${{ vars.VITE_PARTY_HOST }}
       - run: pnpm exec wrangler pages deploy .svelte-kit/cloudflare --project-name=gardeners-dilemma
         working-directory: apps/web
