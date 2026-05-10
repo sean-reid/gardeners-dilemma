@@ -15,7 +15,8 @@
 		onclick?: () => void;
 	} = $props();
 
-	let heightPercent = $derived(15 + Math.min(vine.value / 60, 1) * 85);
+	let heightPercent = $derived(25 + Math.min(vine.value / 30, 1) * 75);
+	let isEven = $derived(vine.value % 2 === 0);
 
 	let mainGreen = '#3a6b45';
 	let lightGreen = '#6aaa5c';
@@ -68,8 +69,6 @@
 >
 	{#if selected}
 		<div class="absolute -inset-1.5 rounded-2xl vine-pulse-ring z-0"></div>
-	{:else if chained}
-		<div class="absolute -inset-1 rounded-2xl vine-chain-ring z-0"></div>
 	{/if}
 
 	<svg
@@ -85,8 +84,12 @@
 			</linearGradient>
 		</defs>
 
-		<ellipse cx="30" cy="298" rx="20" ry="5" fill="#8B7355" opacity="0.25" />
-		<ellipse cx="30" cy="297" rx="15" ry="3" fill="#6B5B45" opacity="0.15" />
+		{#if chained}
+			<ellipse cx="30" cy="280" rx="18" ry="60" fill="#d4af37" opacity="0.08" class="vine-chain-pulse" />
+		{/if}
+
+		<ellipse cx="30" cy="298" rx="20" ry="5" fill={chained ? '#d4af37' : '#8B7355'} opacity={chained ? 0.35 : 0.25} />
+		<ellipse cx="30" cy="297" rx="15" ry="3" fill={chained ? '#b8962e' : '#6B5B45'} opacity={chained ? 0.25 : 0.15} />
 
 		<path
 			d={stemPath()}
@@ -99,10 +102,10 @@
 		<path
 			d={stemPath()}
 			fill="none"
-			stroke={lightGreen}
-			stroke-width="1.2"
+			stroke={chained ? '#d4af37' : lightGreen}
+			stroke-width={chained ? 1.8 : 1.2}
 			stroke-linecap="round"
-			opacity="0.2"
+			opacity={chained ? 0.35 : 0.2}
 		/>
 
 		{#each leaves as leaf, i (i)}
@@ -167,14 +170,12 @@
 		50% { box-shadow: 0 0 16px 4px rgba(200, 90, 58, 0.1); border-color: rgba(200, 90, 58, 0.3); }
 	}
 
-	.vine-chain-ring {
-		border: 2px solid rgba(212, 175, 55, 0.5);
-		background: rgba(212, 175, 55, 0.04);
-		animation: chain-glow 2s ease-in-out infinite;
+	:global(.vine-chain-pulse) {
+		animation: chain-pulse 2s ease-in-out infinite;
 	}
 
-	@keyframes chain-glow {
-		0%, 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.3); border-color: rgba(212, 175, 55, 0.5); }
-		50% { box-shadow: 0 0 12px 3px rgba(212, 175, 55, 0.15); border-color: rgba(212, 175, 55, 0.7); }
+	@keyframes chain-pulse {
+		0%, 100% { opacity: 0.06; }
+		50% { opacity: 0.12; }
 	}
 </style>
