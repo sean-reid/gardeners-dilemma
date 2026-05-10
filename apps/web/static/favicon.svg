@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="stem" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6aaa5c"/>
+      <stop offset="100%" stop-color="#2D5A3D"/>
+    </linearGradient>
+    <linearGradient id="leaf1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7A9E7E"/>
+      <stop offset="100%" stop-color="#3a6b45"/>
+    </linearGradient>
+    <linearGradient id="leaf2" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4a8a3e"/>
+      <stop offset="100%" stop-color="#2D5A3D"/>
+    </linearGradient>
+  </defs>
+  <!-- Warm circle background -->
+  <circle cx="16" cy="16" r="15" fill="#FAF7F2"/>
+  <circle cx="16" cy="16" r="15" fill="none" stroke="#B8A99A" stroke-width="0.5" opacity="0.4"/>
+  <!-- Main stem with gentle curve -->
+  <path d="M 16,28 C 15,24 14,20 15,16 C 16,12 15,8 16,5" fill="none" stroke="url(#stem)" stroke-width="2" stroke-linecap="round"/>
+  <!-- Left leaf (lower) -->
+  <path d="M 15,19 C 10,17 7,14 6,12 C 8,13 11,14 15,17 Z" fill="url(#leaf1)" opacity="0.85"/>
+  <path d="M 15,18 C 11,16 8,13.5 6.5,12" fill="none" stroke="#2D5A3D" stroke-width="0.4" opacity="0.3"/>
+  <!-- Right leaf (lower-mid) -->
+  <path d="M 15.5,16 C 20,14 23,12 25,10 C 23,12 20,13 15.5,14.5 Z" fill="url(#leaf2)" opacity="0.8"/>
+  <path d="M 15.5,15.2 C 20,13.5 22.5,11.5 24.5,10.2" fill="none" stroke="#2D5A3D" stroke-width="0.4" opacity="0.3"/>
+  <!-- Left leaf (upper) -->
+  <path d="M 15.5,12 C 11,10 8.5,8 7,6 C 9,7.5 12,9 15.5,10.5 Z" fill="url(#leaf1)" opacity="0.75"/>
+  <!-- Small right leaf (top) -->
+  <path d="M 16,8.5 C 19,7 21,5.5 22,4.5 C 20.5,6 18.5,7 16,8 Z" fill="url(#leaf2)" opacity="0.7"/>
+  <!-- Tiny unfurling leaf at top -->
+  <ellipse cx="16.3" cy="5.5" rx="1.2" ry="2" fill="#6aaa5c" opacity="0.6" transform="rotate(-10 16.3 5.5)"/>
+  <!-- Soil crescent at base -->
+  <ellipse cx="16" cy="28.5" rx="5" ry="1.5" fill="#8B7355" opacity="0.25"/>
+  <!-- Subtle tendril -->
+  <path d="M 15,13 C 13.5,12 12.5,12.5 12.5,13.5 C 12.5,14 13,14 13.5,13.5" fill="none" stroke="#6aaa5c" stroke-width="0.6" opacity="0.4" stroke-linecap="round"/>
+</svg>

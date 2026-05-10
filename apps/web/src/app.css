@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@theme {
+	--color-parchment: #FAF7F2;
+	--color-forest: #2D5A3D;
+	--color-sage: #7A9E7E;
+	--color-terracotta: #C85A3A;
+	--color-indigo: #3D4785;
+	--color-burgundy: #8B3A3A;
+	--color-bark: #2C2416;
+	--color-warmgray: #B8A99A;
+	--font-display: 'Fraunces', serif;
+	--font-body: 'DM Sans', sans-serif;
+	--font-mono: 'DM Mono', monospace;
+}
+
+body {
+	@apply bg-parchment text-bark font-body;
+}

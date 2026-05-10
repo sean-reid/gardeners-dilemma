@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.svelte-kit/
+.partykit/
+.turbo/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+.vercel/
+.wrangler/
+build/
+coverage/
+test-results/
+playwright-report/
