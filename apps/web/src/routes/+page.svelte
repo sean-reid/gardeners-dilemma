@@ -1,5 +1,6 @@
 <script lang="ts">
 	let joinCode = $state('');
+	let showHowTo = $state(false);
 
 	function handleJoin() {
 		if (joinCode.length === 4) {
@@ -91,9 +92,38 @@
 			</div>
 		</section>
 
-		<!-- Footer hint -->
-		<p class="text-sm text-warmgray/60">
-			A game of Collatz sequences, pruning, and nerve.
-		</p>
+		<!-- How to play -->
+		<section class="text-left">
+			<button
+				onclick={() => showHowTo = !showHowTo}
+				class="w-full text-sm text-warmgray/60 hover:text-warmgray transition-colors cursor-pointer text-center"
+			>
+				{showHowTo ? 'Hide' : 'How to play'}
+			</button>
+
+			{#if showHowTo}
+				<div class="mt-4 space-y-4 text-sm text-bark/70 leading-relaxed">
+					<div>
+						<h3 class="font-display font-semibold text-bark mb-1">The Garden</h3>
+						<p>Five vines grow on the board. Every 2.5 seconds, each vine changes value following the Collatz rule: even numbers halve, odd numbers triple and add one. Tap any vine to harvest it and score its value. After harvesting, you wait 3 seconds before you can harvest again.</p>
+					</div>
+
+					<div>
+						<h3 class="font-display font-semibold text-bark mb-1">Chains</h3>
+						<p>This is where it gets deep. If your next harvest is a number that appears in the Collatz sequence of your previous harvest, you build a chain. Chains multiply your score: 1.5x, 2x, 2.5x, and so on. Harvest something outside the sequence and the chain breaks.</p>
+					</div>
+
+					<div>
+						<h3 class="font-display font-semibold text-bark mb-1">Example</h3>
+						<p>You harvest a <span class="font-mono font-bold">13</span>. Its Collatz sequence is 40, 20, 10, 5, 16, 8... If a vine on the board shows <span class="font-mono font-bold">40</span>, grabbing it continues your chain at 1.5x. Golden outlines show which vines keep your chain alive.</p>
+					</div>
+
+					<div>
+						<h3 class="font-display font-semibold text-bark mb-1">Winning</h3>
+						<p>First to 500 points, or highest score after 90 seconds. Play it safe with raw harvests, or gamble on building long chains for massive multiplied scores.</p>
+					</div>
+				</div>
+			{/if}
+		</section>
 	</div>
 </main>

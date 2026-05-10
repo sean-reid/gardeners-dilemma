@@ -3,7 +3,25 @@ import { generateSingleVine } from './vine-generator.js';
 import type { Vine, PlayerSlot, HarvestResult } from './types.js';
 
 export function isHarvestable(vine: Vine): boolean {
-  return vine.alive && vine.value % 2 !== 0;
+  return vine.alive;
+}
+
+export function getChainTargets(value: number, maxSteps = 25): Set<number> {
+  const targets = new Set<number>();
+  let current = value;
+  for (let i = 0; i < maxSteps && current > 1; i++) {
+    current = collatzStep(current);
+    targets.add(current);
+  }
+  return targets;
+}
+
+export function isChainConnected(lastValue: number, candidateValue: number): boolean {
+  return getChainTargets(lastValue).has(candidateValue);
+}
+
+export function getChainMultiplier(chainLength: number): number {
+  return 1 + chainLength * 0.5;
 }
 
 export function tickVines(vines: Vine[]): { vines: Vine[]; withered: number[]; sprouted: Vine[] } {

@@ -4,6 +4,9 @@
 		tickVines,
 		harvest,
 		isHarvestable,
+		isChainConnected,
+		getChainTargets,
+		getChainMultiplier,
 		collatzStep,
 		SCORE_THRESHOLD,
 		GAME_DURATION,
@@ -32,7 +35,7 @@
 	let progressTimer: ReturnType<typeof setInterval> | null = null;
 	let aiTimer: ReturnType<typeof setTimeout> | null = null;
 
-	let lastHarvest = $state<{ playerId: PlayerSlot; value: number } | null>(null);
+	let lastHarvest = $state<{ playerId: PlayerSlot; value: number; multiplied: number } | null>(null);
 	let harvestFadeTimer: ReturnType<typeof setTimeout> | null = null;
 
 	const PLAYER: PlayerSlot = 1;
@@ -43,6 +46,14 @@
 	let aiCooldownUntil = $state(0);
 	let playerCooldown = $state(0);
 	let cooldownTimer: ReturnType<typeof setInterval> | null = null;
+
+	let playerChain = $state<{ lastValue: number | null; length: number }>({ lastValue: null, length: 0 });
+	let aiChain = $state<{ lastValue: number | null; length: number }>({ lastValue: null, length: 0 });
+
+	let playerChainTargets = $derived(
+		playerChain.lastValue !== null ? getChainTargets(playerChain.lastValue) : new Set<number>()
+	);
+	let playerMultiplier = $derived(getChainMultiplier(playerChain.length));
 
 	function startGame(diff: AiDifficulty) {
 		difficulty = diff;
@@ -55,6 +66,8 @@
 		playerCooldownUntil = 0;
 		aiCooldownUntil = 0;
 		playerCooldown = 0;
+		playerChain = { lastValue: null, length: 0 };
+		aiChain = { lastValue: null, length: 0 };
 		screen = 'playing';
 
 		startTimers();
@@ -109,9 +122,30 @@
 		const result = harvest(vines, vineId, playerId);
 		if (!result.result) return;
 
+		const chain = playerId === PLAYER ? playerChain : aiChain;
+		const harvestedValue = result.result.value;
+
+		let chained = false;
+		if (chain.lastValue !== null && isChainConnected(chain.lastValue, harvestedValue)) {
+			chained = true;
+		}
+
+		const multiplier = chained ? getChainMultiplier(chain.length + 1) : 1;
+		const multipliedScore = Math.round(harvestedValue * multiplier);
+
 		vines = result.vines;
-		scores[result.result.playerId - 1] += result.result.value;
+		scores[result.result.playerId - 1] += multipliedScore;
 		scores = scores;
+
+		if (playerId === PLAYER) {
+			playerChain = chained
+				? { lastValue: harvestedValue, length: chain.length + 1 }
+				: { lastValue: harvestedValue, length: 0 };
+		} else {
+			aiChain = chained
+				? { lastValue: harvestedValue, length: chain.length + 1 }
+				: { lastValue: harvestedValue, length: 0 };
+		}
 
 		const now = Date.now();
 		if (playerId === PLAYER) {
@@ -121,17 +155,18 @@
 			aiCooldownUntil = now + COOLDOWN_MS;
 		}
 
-		showHarvestPopup(result.result);
+		showHarvestPopup(result.result, multipliedScore);
 
 		if (scores[0] >= SCORE_THRESHOLD || scores[1] >= SCORE_THRESHOLD) {
 			endGame();
 		}
 	}
 
-	function showHarvestPopup(result: HarvestResult) {
+	function showHarvestPopup(result: HarvestResult, multipliedScore: number) {
 		lastHarvest = {
 			playerId: result.playerId,
 			value: result.value,
+			multiplied: multipliedScore,
 		};
 		if (harvestFadeTimer) clearTimeout(harvestFadeTimer);
 		harvestFadeTimer = setTimeout(() => { lastHarvest = null; }, 1200);
@@ -183,31 +218,40 @@
 
 		let target: Vine | null = null;
 
+		const aiTargets = aiChain.lastValue !== null
+			? getChainTargets(aiChain.lastValue)
+			: new Set<number>();
+		const chainVines = harvestable.filter((v) => aiTargets.has(v.value));
+		const aiMult = getChainMultiplier(aiChain.length + 1);
+
 		switch (difficulty) {
 			case 'seedling': {
-				if (Math.random() < 0.3) return;
+				if (Math.random() < 0.3) break;
 				target = harvestable[Math.floor(Math.random() * harvestable.length)];
 				break;
 			}
 			case 'gardener': {
-				if (Math.random() < 0.15) return;
-				const atPeak = harvestable.filter((v) => {
-					const future = simulateOddPeak(v.value, 3);
-					return v.value >= future;
-				});
-				target = atPeak.length > 0
-					? highest(atPeak)
-					: (Math.random() < 0.4 ? highest(harvestable) : null);
+				if (Math.random() < 0.15) break;
+				if (chainVines.length > 0 && Math.random() < 0.6) {
+					target = highest(chainVines);
+				} else {
+					target = highest(harvestable);
+				}
 				break;
 			}
 			case 'botanist': {
-				if (Math.random() < 0.05) return;
-				const scored = harvestable.map((v) => {
-					const peak = simulateOddPeak(v.value, 5);
-					const proximity = peak > 0 ? v.value / peak : 0;
-					return { vine: v, score: v.value * proximity };
-				}).sort((a, b) => b.score - a.score);
-				target = scored[0]?.vine ?? null;
+				if (Math.random() < 0.05) break;
+				if (chainVines.length > 0) {
+					const bestChain = highest(chainVines);
+					const bestRaw = highest(harvestable);
+					if (bestChain.value * aiMult > bestRaw.value) {
+						target = bestChain;
+					} else {
+						target = Math.random() < 0.3 ? bestChain : bestRaw;
+					}
+				} else {
+					target = highest(harvestable);
+				}
 				break;
 			}
 		}
@@ -219,16 +263,6 @@
 		if (screen === 'playing') {
 			scheduleAiAction();
 		}
-	}
-
-	function simulateOddPeak(value: number, steps: number): number {
-		let current = value;
-		let maxOdd = value % 2 !== 0 ? value : 0;
-		for (let i = 0; i < steps; i++) {
-			current = collatzStep(current);
-			if (current % 2 !== 0) maxOdd = Math.max(maxOdd, current);
-		}
-		return maxOdd;
 	}
 
 	function highest(arr: Vine[]): Vine {
@@ -248,8 +282,8 @@
 </svelte:head>
 
 {#if screen === 'difficulty'}
-	<main class="flex flex-col items-center justify-center min-h-screen px-6 py-12">
-		<div class="w-full max-w-md space-y-10 text-center">
+	<main class="flex flex-col items-center justify-center min-h-svh px-6 py-6 sm:py-12">
+		<div class="w-full max-w-md space-y-8 sm:space-y-10 text-center">
 			<header class="space-y-2">
 				<h1 class="font-display text-4xl font-semibold text-forest">Solo Play</h1>
 				<p class="text-warmgray">Choose your difficulty</p>
@@ -279,15 +313,15 @@
 	</main>
 
 {:else if screen === 'playing'}
-	<main class="flex flex-col min-h-screen max-w-lg mx-auto">
+	<main class="flex flex-col min-h-svh max-w-lg mx-auto">
 		<div class="px-4 pt-4 space-y-3">
 			<ScoreBar
 				{scores}
 				{timeLeft}
 				playerSlot={PLAYER}
+				chainMultiplier={playerMultiplier}
 			/>
 
-			<!-- Tick progress bar -->
 			<div class="h-1.5 bg-warmgray/20 rounded-full overflow-hidden">
 				<div
 					class="h-full bg-sage/60 rounded-full transition-none"
@@ -300,6 +334,8 @@
 			<VineRow
 				{vines}
 				disabled={playerOnCooldown}
+				chainTargets={playerChainTargets}
+				chainLength={playerChain.length}
 				playerSlot={PLAYER}
 				onharvest={handleVineClick}
 			/>
@@ -319,12 +355,15 @@
 		{#if lastHarvest}
 			<div
 				class="fixed top-1/3 left-1/2 -translate-x-1/2 pointer-events-none
-					text-2xl font-display font-bold harvest-popup
+					text-center harvest-popup
 					{lastHarvest.playerId === PLAYER ? 'text-terracotta' : 'text-indigo'}"
 				role="status"
 				aria-live="polite"
 			>
-				+{lastHarvest.value}
+				<div class="text-2xl font-display font-bold">+{lastHarvest.multiplied}</div>
+				{#if lastHarvest.multiplied !== lastHarvest.value}
+					<div class="text-sm font-mono opacity-70">{lastHarvest.value} x {(lastHarvest.multiplied / lastHarvest.value).toFixed(1)}</div>
+				{/if}
 			</div>
 		{/if}
 	</main>

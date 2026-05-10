@@ -4,25 +4,25 @@
 	let {
 		vine,
 		selected = false,
+		chained = false,
 		disabled = false,
 		onclick,
 	}: {
 		vine: Vine;
 		selected?: boolean;
+		chained?: boolean;
 		disabled?: boolean;
 		onclick?: () => void;
 	} = $props();
 
 	let heightPercent = $derived(15 + Math.min(vine.value / 60, 1) * 85);
-	let isEven = $derived(vine.value % 2 === 0);
-	let ripe = $derived(!isEven);
 
-	let mainGreen = $derived(ripe ? '#3a6b45' : '#8aaa82');
-	let lightGreen = $derived(ripe ? '#6aaa5c' : '#b0c8a8');
-	let darkGreen = $derived(ripe ? '#2D5A3D' : '#7a9a72');
-	let leafFill1 = $derived(ripe ? '#4a8a3e' : '#96b890');
-	let leafFill2 = $derived(ripe ? '#6aaa5c' : '#b0c8a8');
-	let leafFill3 = $derived(ripe ? '#3a7a35' : '#82a87a');
+	let mainGreen = '#3a6b45';
+	let lightGreen = '#6aaa5c';
+	let darkGreen = '#2D5A3D';
+	let leafFill1 = '#4a8a3e';
+	let leafFill2 = '#6aaa5c';
+	let leafFill3 = '#3a7a35';
 
 	let leafCount = $derived(Math.max(1, Math.min(8, Math.floor(vine.value / 12))));
 	let stemWidth = $derived(3 + Math.min(vine.value / 30, 3));
@@ -56,18 +56,20 @@
 <button
 	class="vine-wrap group relative
 		transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]
-		{vine.alive && ripe && !disabled ? 'cursor-pointer' : 'cursor-default'}
-		{disabled || !ripe ? 'pointer-events-none' : ''}"
+		{vine.alive && !disabled ? 'cursor-pointer' : 'cursor-default'}
+		{disabled ? 'pointer-events-none' : ''}"
 	style="height: {vine.alive ? heightPercent : 0}%;
 		min-height: {vine.alive ? '4.5rem' : '0'};
 		opacity: {vine.alive ? 1 : 0};
 		flex: 1; min-width: 44px; transform-origin: bottom;"
 	onclick={handleClick}
-	disabled={disabled || !vine.alive || !ripe}
-	aria-label="Vine {vine.id + 1}, value {vine.value}{ripe ? ', ripe' : ', growing'}"
+	disabled={disabled || !vine.alive}
+	aria-label="Vine {vine.id + 1}, value {vine.value}{chained ? ', chain target' : ''}"
 >
 	{#if selected}
 		<div class="absolute -inset-1.5 rounded-2xl vine-pulse-ring z-0"></div>
+	{:else if chained}
+		<div class="absolute -inset-1 rounded-2xl vine-chain-ring z-0"></div>
 	{/if}
 
 	<svg
@@ -163,5 +165,16 @@
 	@keyframes pulse-glow {
 		0%, 100% { box-shadow: 0 0 0 0 rgba(200, 90, 58, 0.25); border-color: rgba(200, 90, 58, 0.5); }
 		50% { box-shadow: 0 0 16px 4px rgba(200, 90, 58, 0.1); border-color: rgba(200, 90, 58, 0.3); }
+	}
+
+	.vine-chain-ring {
+		border: 2px solid rgba(212, 175, 55, 0.5);
+		background: rgba(212, 175, 55, 0.04);
+		animation: chain-glow 2s ease-in-out infinite;
+	}
+
+	@keyframes chain-glow {
+		0%, 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.3); border-color: rgba(212, 175, 55, 0.5); }
+		50% { box-shadow: 0 0 12px 3px rgba(212, 175, 55, 0.15); border-color: rgba(212, 175, 55, 0.7); }
 	}
 </style>

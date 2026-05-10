@@ -4,6 +4,8 @@ import {
   tickVines,
   harvest,
   isHarvestable,
+  isChainConnected,
+  getChainMultiplier,
   SCORE_THRESHOLD,
   GAME_DURATION,
   TICK_INTERVAL,
@@ -12,12 +14,18 @@ import type { Vine, PlayerSlot, HarvestResult } from "@gardeners-dilemma/game-lo
 
 type Phase = "waiting" | "playing" | "gameover";
 
+interface ChainState {
+  lastValue: number | null;
+  length: number;
+}
+
 interface ServerState {
   phase: Phase;
   vines: Vine[];
   scores: [number, number];
   timeLeft: number;
   cooldownUntil: [number, number];
+  chains: [ChainState, ChainState];
   winner: PlayerSlot | "draw" | null;
 }
 
@@ -27,7 +35,7 @@ type ClientMessage =
 type ServerMessage =
   | { type: "assigned"; slot: PlayerSlot }
   | { type: "state"; state: ServerState }
-  | { type: "harvested"; result: HarvestResult }
+  | { type: "harvested"; result: HarvestResult; multiplied: number; chainLength: number }
   | { type: "gameover"; winner: PlayerSlot | "draw"; scores: [number, number] }
   | { type: "error"; message: string };
 
@@ -40,6 +48,7 @@ export default class GardenersDilemmaServer implements Party.Server {
     scores: [0, 0],
     timeLeft: GAME_DURATION,
     cooldownUntil: [0, 0],
+    chains: [{ lastValue: null, length: 0 }, { lastValue: null, length: 0 }],
     winner: null,
   };
 
@@ -108,6 +117,7 @@ export default class GardenersDilemmaServer implements Party.Server {
     this.state.scores = [0, 0];
     this.state.timeLeft = GAME_DURATION;
     this.state.cooldownUntil = [0, 0];
+    this.state.chains = [{ lastValue: null, length: 0 }, { lastValue: null, length: 0 }];
     this.state.winner = null;
 
     this.broadcast({ type: "state", state: this.state });
@@ -134,18 +144,31 @@ export default class GardenersDilemmaServer implements Party.Server {
 
   handleHarvest(slot: PlayerSlot, vineId: number): void {
     const now = Date.now();
-    const cooldownIdx = slot - 1;
+    const idx = slot - 1;
 
-    if (now < this.state.cooldownUntil[cooldownIdx]) return;
+    if (now < this.state.cooldownUntil[idx]) return;
 
     const result = harvest(this.state.vines, vineId, slot);
     if (!result.result) return;
 
-    this.state.vines = result.vines;
-    this.state.scores[result.result.playerId - 1] += result.result.value;
-    this.state.cooldownUntil[cooldownIdx] = now + COOLDOWN_MS;
+    const chain = this.state.chains[idx];
+    const value = result.result.value;
+    let chained = false;
 
-    this.broadcast({ type: "harvested", result: result.result });
+    if (chain.lastValue !== null && isChainConnected(chain.lastValue, value)) {
+      chained = true;
+    }
+
+    const multiplier = chained ? getChainMultiplier(chain.length + 1) : 1;
+    const multiplied = Math.round(value * multiplier);
+    const newLength = chained ? chain.length + 1 : 0;
+
+    this.state.vines = result.vines;
+    this.state.scores[idx] += multiplied;
+    this.state.cooldownUntil[idx] = now + COOLDOWN_MS;
+    this.state.chains[idx] = { lastValue: value, length: newLength };
+
+    this.broadcast({ type: "harvested", result: result.result, multiplied, chainLength: newLength });
     this.broadcast({ type: "state", state: this.state });
 
     if (this.state.scores[0] >= SCORE_THRESHOLD || this.state.scores[1] >= SCORE_THRESHOLD) {

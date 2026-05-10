@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { SCORE_THRESHOLD } from '@gardeners-dilemma/game-logic';
+	import { SCORE_THRESHOLD, getChainTargets, getChainMultiplier } from '@gardeners-dilemma/game-logic';
 	import type { Vine, PlayerSlot, HarvestResult } from '@gardeners-dilemma/game-logic';
 	import PartySocket from 'partysocket';
 
@@ -26,8 +26,15 @@
 	let playerCooldown = $state(0);
 	let cooldownTimer: ReturnType<typeof setInterval> | null = null;
 
-	let lastHarvest = $state<{ playerId: PlayerSlot; value: number } | null>(null);
+	let lastHarvest = $state<{ playerId: PlayerSlot; value: number; multiplied: number } | null>(null);
 	let harvestFadeTimer: ReturnType<typeof setTimeout> | null = null;
+
+	let myChain = $state<{ lastValue: number | null; length: number }>({ lastValue: null, length: 0 });
+
+	let myChainTargets = $derived(
+		myChain.lastValue !== null ? getChainTargets(myChain.lastValue) : new Set<number>()
+	);
+	let myMultiplier = $derived(getChainMultiplier(myChain.length));
 
 	let socket: PartySocket | null = null;
 
@@ -79,10 +86,14 @@
 				} else if (msg.state.phase === 'waiting') {
 					screen = 'waiting';
 				}
+				if (msg.state.chains) {
+					const chainIdx = mySlot - 1;
+					myChain = msg.state.chains[chainIdx];
+				}
 				break;
 
 			case 'harvested':
-				showHarvestPopup(msg.result);
+				showHarvestPopup(msg.result, msg.multiplied);
 				if (msg.result.playerId === mySlot) {
 					playerCooldownUntil = Date.now() + COOLDOWN_MS;
 					playerCooldown = 1;
@@ -108,10 +119,11 @@
 		socket?.send(JSON.stringify({ type: 'harvest', vineId }));
 	}
 
-	function showHarvestPopup(result: HarvestResult) {
+	function showHarvestPopup(result: HarvestResult, multiplied: number) {
 		lastHarvest = {
 			playerId: result.playerId,
 			value: result.value,
+			multiplied,
 		};
 		if (harvestFadeTimer) clearTimeout(harvestFadeTimer);
 		harvestFadeTimer = setTimeout(() => { lastHarvest = null; }, 1200);
@@ -127,14 +139,14 @@
 </svelte:head>
 
 {#if screen === 'connecting'}
-	<main class="flex flex-col items-center justify-center min-h-screen px-6 py-12">
+	<main class="flex flex-col items-center justify-center min-h-svh px-6 py-12">
 		<div class="w-full max-w-md space-y-6 text-center">
 			<h1 class="font-display text-4xl font-semibold text-forest">Connecting...</h1>
 		</div>
 	</main>
 
 {:else if screen === 'waiting'}
-	<main class="flex flex-col items-center justify-center min-h-screen px-6 py-12">
+	<main class="flex flex-col items-center justify-center min-h-svh px-6 py-12">
 		<div class="w-full max-w-md space-y-10 text-center">
 			<header class="space-y-2">
 				<h1 class="font-display text-4xl font-semibold text-forest">Waiting for opponent</h1>
@@ -155,12 +167,13 @@
 	</main>
 
 {:else if screen === 'playing'}
-	<main class="flex flex-col min-h-screen max-w-lg mx-auto">
+	<main class="flex flex-col min-h-svh max-w-lg mx-auto">
 		<div class="px-4 pt-4 space-y-3">
 			<ScoreBar
 				{scores}
 				{timeLeft}
 				playerSlot={mySlot}
+				chainMultiplier={myMultiplier}
 			/>
 		</div>
 
@@ -168,6 +181,8 @@
 			<VineRow
 				{vines}
 				disabled={playerOnCooldown}
+				chainTargets={myChainTargets}
+				chainLength={myChain.length}
 				playerSlot={mySlot}
 				onharvest={handleVineClick}
 			/>
@@ -187,12 +202,15 @@
 		{#if lastHarvest}
 			<div
 				class="fixed top-1/3 left-1/2 -translate-x-1/2 pointer-events-none
-					text-2xl font-display font-bold harvest-popup
+					text-center harvest-popup
 					{lastHarvest.playerId === mySlot ? 'text-terracotta' : 'text-indigo'}"
 				role="status"
 				aria-live="polite"
 			>
-				+{lastHarvest.value}
+				<div class="text-2xl font-display font-bold">+{lastHarvest.multiplied}</div>
+				{#if lastHarvest.multiplied !== lastHarvest.value}
+					<div class="text-sm font-mono opacity-70">{lastHarvest.value} x {(lastHarvest.multiplied / lastHarvest.value).toFixed(1)}</div>
+				{/if}
 			</div>
 		{/if}
 	</main>
@@ -207,7 +225,7 @@
 	/>
 
 {:else if screen === 'error'}
-	<main class="flex flex-col items-center justify-center min-h-screen px-6 py-12">
+	<main class="flex flex-col items-center justify-center min-h-svh px-6 py-12">
 		<div class="w-full max-w-md space-y-6 text-center">
 			<h1 class="font-display text-3xl font-semibold text-burgundy">{errorMessage}</h1>
 			<a href="/" class="inline-block text-sm text-warmgray hover:text-bark transition-colors">

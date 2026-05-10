@@ -5,10 +5,12 @@
 		scores,
 		timeLeft,
 		playerSlot,
+		chainMultiplier = 1,
 	}: {
 		scores: [number, number];
 		timeLeft: number;
 		playerSlot: PlayerSlot;
+		chainMultiplier?: number;
 	} = $props();
 
 	let yourScore = $derived(scores[playerSlot - 1]);
@@ -55,6 +57,9 @@
 		>
 			{yourScore}
 		</span>
+		{#if chainMultiplier > 1}
+			<span class="text-xs font-mono font-bold text-amber-700">{chainMultiplier}x chain</span>
+		{/if}
 	</div>
 
 	<div class="flex flex-col items-center">

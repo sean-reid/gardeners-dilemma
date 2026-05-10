@@ -5,18 +5,18 @@
 	let {
 		vines,
 		disabled = false,
+		chainTargets = new Set<number>(),
+		chainLength = 0,
 		playerSlot,
 		onharvest,
 	}: {
 		vines: VineType[];
 		disabled?: boolean;
+		chainTargets?: Set<number>;
+		chainLength?: number;
 		playerSlot: PlayerSlot;
 		onharvest?: (vineId: number) => void;
 	} = $props();
-
-	function isRipe(vine: VineType): boolean {
-		return vine.alive && vine.value % 2 !== 0;
-	}
 </script>
 
 <div class="w-full px-3">
@@ -25,7 +25,8 @@
 			<Vine
 				{vine}
 				selected={false}
-				disabled={disabled || !isRipe(vine)}
+				chained={chainTargets.has(vine.value)}
+				{disabled}
 				onclick={() => onharvest?.(vine.id)}
 			/>
 		{/each}
@@ -39,17 +40,12 @@
 				<span
 					class="inline-flex items-center justify-center w-full font-mono text-lg font-bold
 						py-1.5 rounded-lg transition-all duration-200
-						{isRipe(vine) && !disabled
-							? 'text-forest'
-							: 'text-warmgray/40'}"
+						{chainTargets.has(vine.value)
+							? 'text-amber-700'
+							: disabled ? 'text-warmgray/40' : 'text-forest'}"
 				>
 					{vine.value}
 				</span>
-				{#if vine.alive}
-					<span class="block text-[10px] font-body mt-0.5 {isRipe(vine) ? 'text-forest/50' : 'text-warmgray/30'}">
-						{isRipe(vine) ? 'ripe' : 'growing'}
-					</span>
-				{/if}
 			</div>
 		{/each}
 	</div>
