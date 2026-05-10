@@ -35,6 +35,8 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm exec partykit deploy
+        working-directory: apps/party
       - run: pnpm turbo build
         env:
           VITE_PARTY_HOST: ${{ vars.VITE_PARTY_HOST }}
