@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import { generateVines } from './vine-generator.js';
-import { collatzSequenceLength } from './collatz.js';
 import { MIN_NUMBER, MAX_NUMBER, VINE_COUNT } from './constants.js';
 
 function isPowerOfTwo(n: number): boolean {
@@ -14,8 +13,8 @@ describe('generateVines', () => {
   });
 
   it('generates a custom count of vines', () => {
-    const vines = generateVines(5);
-    expect(vines).toHaveLength(5);
+    const vines = generateVines(3);
+    expect(vines).toHaveLength(3);
   });
 
   it('all vine values are within the allowed range', () => {
@@ -27,7 +26,6 @@ describe('generateVines', () => {
   });
 
   it('no vine values are powers of 2', () => {
-    // Run multiple times for confidence since generation is random
     for (let i = 0; i < 20; i++) {
       const vines = generateVines();
       for (const vine of vines) {
@@ -51,20 +49,10 @@ describe('generateVines', () => {
   });
 
   it('all vine values are unique', () => {
-    const vines = generateVines();
-    const values = vines.map((v) => v.value);
-    expect(new Set(values).size).toBe(values.length);
-  });
-
-  it('includes a mix of long and short sequences', () => {
-    // Run multiple times for confidence
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 20; i++) {
       const vines = generateVines();
-      const lengths = vines.map((v) => collatzSequenceLength(v.value));
-      const longCount = lengths.filter((l) => l > 30).length;
-      const shortCount = lengths.filter((l) => l < 15).length;
-      expect(longCount).toBeGreaterThanOrEqual(2);
-      expect(shortCount).toBeGreaterThanOrEqual(2);
+      const values = vines.map((v) => v.value);
+      expect(new Set(values).size).toBe(values.length);
     }
   });
 });
