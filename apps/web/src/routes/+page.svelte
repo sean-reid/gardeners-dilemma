@@ -73,7 +73,7 @@
 						placeholder="ABCD"
 						bind:value={joinCode}
 						class="flex-1 rounded-xl border-2 border-warmgray/30 bg-parchment px-4 py-3
-							text-center text-[16px] sm:text-2xl font-mono uppercase tracking-[0.3em] text-bark
+							text-center text-2xl font-mono uppercase tracking-[0.3em] text-bark
 							placeholder:text-warmgray/40
 							focus:border-indigo focus:outline-none transition-colors"
 						onkeydown={(e) => { if (e.key === 'Enter') handleJoin(); }}
