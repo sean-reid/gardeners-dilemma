@@ -4,13 +4,11 @@
 	let {
 		vine,
 		selected = false,
-		chained = false,
 		disabled = false,
 		onclick,
 	}: {
 		vine: Vine;
 		selected?: boolean;
-		chained?: boolean;
 		disabled?: boolean;
 		onclick?: () => void;
 	} = $props();
@@ -65,7 +63,7 @@
 		flex: 1; min-width: 44px; transform-origin: bottom;"
 	onclick={handleClick}
 	disabled={disabled || !vine.alive}
-	aria-label="Vine {vine.id + 1}, value {vine.value}{chained ? ', chain target' : ''}"
+	aria-label="Vine {vine.id + 1}, value {vine.value}"
 >
 	{#if selected}
 		<div class="absolute -inset-1.5 rounded-2xl vine-pulse-ring z-0"></div>
@@ -84,12 +82,8 @@
 			</linearGradient>
 		</defs>
 
-		{#if chained}
-			<ellipse cx="30" cy="280" rx="18" ry="60" fill="#d4af37" opacity="0.08" class="vine-chain-pulse" />
-		{/if}
-
-		<ellipse cx="30" cy="298" rx="20" ry="5" fill={chained ? '#d4af37' : '#8B7355'} opacity={chained ? 0.35 : 0.25} />
-		<ellipse cx="30" cy="297" rx="15" ry="3" fill={chained ? '#b8962e' : '#6B5B45'} opacity={chained ? 0.25 : 0.15} />
+		<ellipse cx="30" cy="298" rx="20" ry="5" fill="#8B7355" opacity="0.25" />
+		<ellipse cx="30" cy="297" rx="15" ry="3" fill="#6B5B45" opacity="0.15" />
 
 		<path
 			d={stemPath()}
@@ -102,10 +96,10 @@
 		<path
 			d={stemPath()}
 			fill="none"
-			stroke={chained ? '#d4af37' : lightGreen}
-			stroke-width={chained ? 1.8 : 1.2}
+			stroke={lightGreen}
+			stroke-width="1.2"
 			stroke-linecap="round"
-			opacity={chained ? 0.35 : 0.2}
+			opacity="0.2"
 		/>
 
 		{#each leaves as leaf, i (i)}
@@ -170,12 +164,4 @@
 		50% { box-shadow: 0 0 16px 4px rgba(200, 90, 58, 0.1); border-color: rgba(200, 90, 58, 0.3); }
 	}
 
-	:global(.vine-chain-pulse) {
-		animation: chain-pulse 2s ease-in-out infinite;
-	}
-
-	@keyframes chain-pulse {
-		0%, 100% { opacity: 0.06; }
-		50% { opacity: 0.12; }
-	}
 </style>

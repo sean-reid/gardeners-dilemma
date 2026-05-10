@@ -1,20 +1,14 @@
 <script lang="ts">
-	import type { Vine as VineType, PlayerSlot } from '@gardeners-dilemma/game-logic';
+	import type { Vine as VineType } from '@gardeners-dilemma/game-logic';
 	import Vine from './Vine.svelte';
 
 	let {
 		vines,
 		disabled = false,
-		chainTargets = new Set<number>(),
-		chainLength = 0,
-		playerSlot,
 		onharvest,
 	}: {
 		vines: VineType[];
 		disabled?: boolean;
-		chainTargets?: Set<number>;
-		chainLength?: number;
-		playerSlot: PlayerSlot;
 		onharvest?: (vineId: number) => void;
 	} = $props();
 </script>
@@ -25,7 +19,6 @@
 			<Vine
 				{vine}
 				selected={false}
-				chained={chainTargets.has(vine.value)}
 				{disabled}
 				onclick={() => onharvest?.(vine.id)}
 			/>
@@ -40,9 +33,7 @@
 				<span
 					class="inline-flex items-center justify-center w-full font-mono text-lg font-bold
 						py-1.5 rounded-lg transition-all duration-200
-						{chainTargets.has(vine.value)
-							? 'text-amber-700'
-							: disabled ? 'text-warmgray/40' : 'text-forest'}"
+						{disabled ? 'text-warmgray/40' : 'text-forest'}"
 				>
 					{vine.value}
 				</span>

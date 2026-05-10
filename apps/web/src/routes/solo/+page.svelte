@@ -50,9 +50,6 @@
 	let playerChain = $state<{ lastValue: number | null; length: number }>({ lastValue: null, length: 0 });
 	let aiChain = $state<{ lastValue: number | null; length: number }>({ lastValue: null, length: 0 });
 
-	let playerChainTargets = $derived(
-		playerChain.lastValue !== null ? getChainTargets(playerChain.lastValue) : new Set<number>()
-	);
 	let playerMultiplier = $derived(getChainMultiplier(playerChain.length));
 
 	function startGame(diff: AiDifficulty) {
@@ -334,9 +331,6 @@
 			<VineRow
 				{vines}
 				disabled={playerOnCooldown}
-				chainTargets={playerChainTargets}
-				chainLength={playerChain.length}
-				playerSlot={PLAYER}
 				onharvest={handleVineClick}
 			/>
 		</div>

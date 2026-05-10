@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { SCORE_THRESHOLD, getChainTargets, getChainMultiplier } from '@gardeners-dilemma/game-logic';
+	import { SCORE_THRESHOLD, getChainMultiplier } from '@gardeners-dilemma/game-logic';
 	import type { Vine, PlayerSlot, HarvestResult } from '@gardeners-dilemma/game-logic';
 	import PartySocket from 'partysocket';
 
@@ -31,9 +31,6 @@
 
 	let myChain = $state<{ lastValue: number | null; length: number }>({ lastValue: null, length: 0 });
 
-	let myChainTargets = $derived(
-		myChain.lastValue !== null ? getChainTargets(myChain.lastValue) : new Set<number>()
-	);
 	let myMultiplier = $derived(getChainMultiplier(myChain.length));
 
 	let socket: PartySocket | null = null;
@@ -181,9 +178,6 @@
 			<VineRow
 				{vines}
 				disabled={playerOnCooldown}
-				chainTargets={myChainTargets}
-				chainLength={myChain.length}
-				playerSlot={mySlot}
 				onharvest={handleVineClick}
 			/>
 		</div>
