@@ -2,6 +2,8 @@
 
 A real-time competitive strategy game where two players race to harvest vines at peak value. Vines grow and shrink according to the Collatz sequence, making long-term prediction impossible. Simple rules, deep strategy, no skill ceiling.
 
+**Play now at [gardeners-dilemma.pages.dev](https://gardeners-dilemma.pages.dev)**
+
 ## How to Play
 
 - 5 vines on the board, each ticking through the Collatz sequence every 2.5 seconds
@@ -16,11 +18,12 @@ The strategy: vines start small but can spike to huge values through Collatz gro
 ## Modes
 
 - **Solo Play** - Three AI difficulty tiers: Seedling, Gardener, Botanist
-- **Online Multiplayer** - Coming soon
+- **Online Multiplayer** - Create a room, share the code, play against a friend in real time
 
 ## Tech Stack
 
 - **Frontend**: SvelteKit 2 + Tailwind CSS 4, deployed to Cloudflare Pages
+- **Multiplayer**: PartyKit (WebSocket server on Cloudflare Workers)
 - **Shared logic**: `@gardeners-dilemma/game-logic` internal package
 - **Monorepo**: pnpm workspaces + Turborepo
 - **CI/CD**: GitHub Actions, auto-deploy on push to main
@@ -29,8 +32,13 @@ The strategy: vines start small but can spike to huge values through Collatz gro
 
 ```bash
 pnpm install
-pnpm dev
+
+# Start both the web app and multiplayer server
+pnpm dev --filter=@gardeners-dilemma/web
+cd apps/party && npx partykit dev
 ```
+
+The web app runs on `localhost:5173` and connects to the PartyKit dev server on `localhost:1999`.
 
 ## License
 
