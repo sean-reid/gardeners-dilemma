@@ -65,15 +65,15 @@
 				<label for="join-code" class="block text-sm font-mono text-warmgray uppercase tracking-wide">
 					Join with code
 				</label>
-				<div class="flex gap-3">
+				<div class="flex gap-2 sm:gap-3">
 					<input
 						id="join-code"
 						type="text"
 						maxlength={4}
 						placeholder="ABCD"
 						bind:value={joinCode}
-						class="flex-1 rounded-xl border-2 border-warmgray/30 bg-parchment px-4 py-3
-							text-center text-2xl font-mono uppercase tracking-[0.3em] text-bark
+						class="flex-1 min-w-0 rounded-xl border-2 border-warmgray/30 bg-parchment px-3 sm:px-4 py-3
+							text-center text-2xl font-mono uppercase tracking-[0.15em] sm:tracking-[0.3em] text-bark
 							placeholder:text-warmgray/40
 							focus:border-indigo focus:outline-none transition-colors"
 						onkeydown={(e) => { if (e.key === 'Enter') handleJoin(); }}
@@ -81,7 +81,7 @@
 					<button
 						onclick={handleJoin}
 						disabled={joinCode.length !== 4}
-						class="rounded-xl bg-terracotta px-6 py-3 font-semibold text-parchment
+						class="shrink-0 rounded-xl bg-terracotta px-4 sm:px-6 py-3 font-semibold text-parchment
 							transition-colors hover:bg-terracotta/90 active:bg-terracotta/80
 							disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
 					>
