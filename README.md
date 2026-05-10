@@ -1,46 +1,35 @@
 # Gardener's Dilemma
 
-A competitive strategy game where two players race to harvest vines at peak value. Each vine grows and shrinks according to the Collatz sequence, making it impossible to predict long-term behavior. Simple rules, deep strategy, no skill ceiling.
+A real-time competitive strategy game where two players race to harvest vines at peak value. Vines grow and shrink according to the Collatz sequence, making long-term prediction impossible. Simple rules, deep strategy, no skill ceiling.
 
 ## How to Play
 
-- 7 shared vines on the board, each with a visible number
-- Each turn, both players simultaneously choose: **Cut** one vine, or **Wait**
-- If only one player cuts a vine, they score its value
-- If both cut the same vine, it's destroyed and nobody scores
-- After each turn, surviving vines step through a Collatz iteration (even: halve, odd: triple and add one)
-- Vines that reach 1 wither away, and a new vine sprouts in its place
-- First to 200 points wins, or highest score after 15 turns
+- 5 vines on the board, each ticking through the Collatz sequence every 2.5 seconds
+- Even numbers halve, odd numbers triple and add one
+- Only **odd-valued** (ripe) vines can be harvested - tap one to score its value
+- After harvesting, you're on a 3-second cooldown before you can harvest again
+- A new vine sprouts immediately to replace any harvested or withered vine
+- First to 500 points wins, or highest score after 90 seconds
+
+The strategy: vines start small but can spike to huge values through Collatz growth. Do you grab a 17 now, or wait for it to become 52 next tick (even, locked), then 26, then 13, then 40, then 20, then 10, then 5? Timing your harvests around the cooldown and predicting when values will peak at an odd number is the whole game.
 
 ## Modes
 
 - **Solo Play** - Three AI difficulty tiers: Seedling, Gardener, Botanist
-- **Online Multiplayer** - Create a room, share the code, play in real time
+- **Online Multiplayer** - Coming soon
 
 ## Tech Stack
 
 - **Frontend**: SvelteKit 2 + Tailwind CSS 4, deployed to Cloudflare Pages
-- **Multiplayer**: PartyKit (WebSocket rooms on Cloudflare edge)
 - **Shared logic**: `@gardeners-dilemma/game-logic` internal package
 - **Monorepo**: pnpm workspaces + Turborepo
+- **CI/CD**: GitHub Actions, auto-deploy on push to main
 
 ## Development
 
 ```bash
 pnpm install
 pnpm dev
-```
-
-The web app runs on `http://localhost:5173` and the PartyKit server on `http://localhost:1999`.
-
-## Project Structure
-
-```
-apps/
-  web/          SvelteKit frontend
-  party/        PartyKit multiplayer server
-packages/
-  game-logic/   Shared game engine, types, Collatz math
 ```
 
 ## License
