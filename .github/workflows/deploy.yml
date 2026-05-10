@@ -36,7 +36,5 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm turbo build
-      - run: pnpm exec wrangler pages project create gardeners-dilemma --production-branch=main 2>/dev/null || true
-        working-directory: apps/web
       - run: pnpm exec wrangler pages deploy .svelte-kit/cloudflare --project-name=gardeners-dilemma
         working-directory: apps/web
