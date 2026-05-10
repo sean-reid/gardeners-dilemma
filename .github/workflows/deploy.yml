@@ -35,13 +35,13 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm turbo build
+        env:
+          VITE_PARTY_HOST: ${{ vars.VITE_PARTY_HOST }}
       - run: pnpm exec partykit deploy
         working-directory: apps/party
         env:
           PARTYKIT_LOGIN: ${{ secrets.PARTYKIT_LOGIN }}
           PARTYKIT_TOKEN: ${{ secrets.PARTYKIT_TOKEN }}
-      - run: pnpm turbo build
-        env:
-          VITE_PARTY_HOST: ${{ vars.VITE_PARTY_HOST }}
       - run: pnpm exec wrangler pages deploy .svelte-kit/cloudflare --project-name=gardeners-dilemma
         working-directory: apps/web
