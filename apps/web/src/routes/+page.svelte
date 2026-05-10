@@ -22,8 +22,8 @@
 	<title>Gardener's Dilemma</title>
 </svelte:head>
 
-<main class="flex flex-col items-center justify-center min-h-screen px-6 py-12">
-	<div class="w-full max-w-md space-y-12 text-center">
+<main class="flex flex-col items-center justify-center min-h-svh px-6 py-6 sm:py-12">
+	<div class="w-full max-w-md space-y-8 sm:space-y-12 text-center">
 		<!-- Title -->
 		<header class="space-y-3">
 			<h1 class="font-display text-5xl sm:text-6xl font-semibold text-forest leading-tight">
