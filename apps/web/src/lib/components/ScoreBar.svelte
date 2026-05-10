@@ -43,7 +43,10 @@
 	let timeUrgent = $derived(timeLeft <= 15);
 </script>
 
-<div class="flex items-center justify-between px-4 py-3 bg-bark/5 rounded-xl">
+<div class="sr-only" aria-live="polite" aria-atomic="true">
+	You: {yourScore}. Rival: {rivalScore}. Time: {timeDisplay}.
+</div>
+<div class="flex items-center justify-between px-4 py-3 bg-bark/5 rounded-xl" aria-hidden="true">
 	<div class="flex flex-col items-start">
 		<span class="text-xs font-body text-warmgray uppercase tracking-wide">You</span>
 		<span

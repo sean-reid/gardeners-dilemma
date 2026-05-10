@@ -306,8 +306,8 @@
 		</div>
 
 		{#if playerOnCooldown}
-			<div class="px-4 pb-4">
-				<div class="h-2 bg-warmgray/20 rounded-full overflow-hidden">
+			<div class="px-4 pb-4" role="status" aria-label="Harvest cooldown active">
+				<div class="h-2 bg-warmgray/20 rounded-full overflow-hidden" aria-hidden="true">
 					<div
 						class="h-full bg-terracotta/50 rounded-full transition-none"
 						style="width: {playerCooldown * 100}%"
@@ -321,6 +321,8 @@
 				class="fixed top-1/3 left-1/2 -translate-x-1/2 pointer-events-none
 					text-2xl font-display font-bold harvest-popup
 					{lastHarvest.playerId === PLAYER ? 'text-terracotta' : 'text-indigo'}"
+				role="status"
+				aria-live="polite"
 			>
 				+{lastHarvest.value}
 			</div>

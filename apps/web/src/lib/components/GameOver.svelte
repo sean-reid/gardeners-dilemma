@@ -26,9 +26,22 @@
 
 	let yourScore = $derived(scores[playerSlot - 1]);
 	let rivalScore = $derived(scores[playerSlot === 1 ? 1 : 0]);
+
+	let dialogEl: HTMLDivElement | undefined = $state();
+
+	$effect(() => {
+		if (dialogEl) {
+			const btn = dialogEl.querySelector('button');
+			btn?.focus();
+		}
+	});
 </script>
 
 <div
+	bind:this={dialogEl}
+	role="dialog"
+	aria-modal="true"
+	aria-label="{headlineText} Your score {yourScore}, rival score {rivalScore}"
 	class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-bark/70 px-6"
 	transition:fade={{ duration: 300 }}
 >
